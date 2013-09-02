@@ -5,7 +5,7 @@
 
 int main()
 {
-	struct timeval timeBeforeInit, timeAfterInit, timeBeforeBlock, timeAfterBlock, timeBeforeSimple, timeAfterSimple, timeStart, timeEnd;
+	struct timeval timeBeforeInit, timeAfterInit, timeBeforeBlock, timeAfterBlock, timeBeforeSimple, timeAfterSimple, timeStart, timeEnd, t1, t2, t3, t4;
 	gettimeofday(&timeStart, NULL);
 	int n;
 	printf("Size of array : " );
@@ -18,7 +18,6 @@ int main()
 	srand(time(NULL));
 	
 	gettimeofday(&timeStart, NULL);
-	printf("Starting initialization...\n");
 	gettimeofday(&timeBeforeInit, NULL);
 	for(i=0; i < n; i++){
 		for(j =0; j < n; j++){
@@ -26,15 +25,11 @@ int main()
 		}
 	}	
 	gettimeofday(&timeAfterInit, NULL);
-	printf("Initialization has ended.\n");
 	elapsedTime = ((timeAfterInit.tv_sec - timeBeforeInit.tv_sec) +
 					(timeAfterInit.tv_usec - timeBeforeInit.tv_usec)/1000000.0);
-	printf("  ");
-	printf("Time for initialization : %f Seconds \n", elapsedTime);
 		
 	int result[n][n];
 	
-    printf("Starting block based multiplication...\n");
     gettimeofday(&timeBeforeBlock, NULL);
 	
 	int x, y;
@@ -56,6 +51,36 @@ int main()
 		}
 
     }
+	
+	gettimeofday(&timeAfterBlock, NULL);
+	elapsedTime = ((timeAfterBlock.tv_sec - timeBeforeBlock.tv_sec) +
+					(timeAfterBlock.tv_usec - timeBeforeBlock.tv_usec)/1000000.0);
+	printf("Time for block based ij multiplication : %f Seconds \n", elapsedTime);
+	
+	gettimeofday(&t3, NULL);	
+	for (j = 0; j < n; j += blockSize)
+	{		
+		for (i = 0; i < n; i += blockSize) 
+		{
+			for (x = i; x < MIN(i + blockSize, n); x++) 
+			{
+				for (y = j; y < MIN(j + blockSize, n); y++) 
+				{
+					result[x][y] = 0;
+					for(k = 0; k < blockSize; k++)
+					{
+						result[x][y] = matrix[x][k] * matrix[k][y];
+					}
+				}	
+			}
+		}
+
+    }
+	
+	gettimeofday(&t4, NULL);
+	elapsedTime = ((t4.tv_sec - t3.tv_sec) +
+					(t4.tv_usec - t3.tv_usec)/1000000.0);
+	printf("Time for block based ji multiplication : %f Seconds \n", elapsedTime);
 	
 	/*for(i = 0; i < n; i++)
 	{
@@ -81,15 +106,9 @@ int main()
 		printf("\n");
 	}
 	*/	
-	gettimeofday(&timeAfterBlock, NULL);
-	printf("Block based multiplication has ended.\n");
-	elapsedTime = ((timeAfterBlock.tv_sec - timeBeforeBlock.tv_sec) +
-					(timeAfterBlock.tv_usec - timeBeforeBlock.tv_usec)/1000000.0);
-	printf("  ");
-	printf("Time for block based multiplication : %f Seconds \n", elapsedTime);
 	
 	
-	printf("Starting simple multiplication...\n");
+	
     gettimeofday(&timeBeforeSimple, NULL);
 	
 	for(i = 0; i < n; i++)
@@ -103,6 +122,30 @@ int main()
 			}
 		}
 	}
+	
+	gettimeofday(&timeAfterSimple, NULL);
+	elapsedTime = ((timeAfterSimple.tv_sec - timeBeforeSimple.tv_sec) +
+					(timeAfterSimple.tv_usec - timeBeforeSimple.tv_usec)/1000000.0);
+	printf("Time for simple ij multiplication : %f Seconds \n", elapsedTime);
+	
+	
+	gettimeofday(&t1, NULL);
+	for(j = 0; j < n; j++)
+	{
+		for(i = 0; i < n; i++)
+		{
+			result[i][j] = 0;
+			for(k = 0; k < n; k++)
+			{
+				result[i][j] = matrix[i][k] * matrix[k][j];
+			}
+		}
+	}
+	
+	gettimeofday(&t2, NULL);
+	elapsedTime = ((t2.tv_sec - t1.tv_sec) +
+					(t2.tv_usec - t1.tv_usec)/1000000.0);
+	printf("Time for simple ji multiplication : %f Seconds \n", elapsedTime);
 	
 	
 	/*printf("Matrix after simple \n");
@@ -119,12 +162,7 @@ int main()
 	*/
 	
 	
-	gettimeofday(&timeAfterSimple, NULL);
-	printf("Simple multiplication has ended.\n");
-	elapsedTime = ((timeAfterSimple.tv_sec - timeBeforeSimple.tv_sec) +
-					(timeAfterSimple.tv_usec - timeBeforeSimple.tv_usec)/1000000.0);
-	printf("  ");
-	printf("Time for simple multiplication : %f Seconds \n", elapsedTime);
+	
 	
 	
 	gettimeofday(&timeEnd, NULL);
